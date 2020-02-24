@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+</head>
+<body>
+
+<div th:fragment="menu-sequense">
+    <th:block th:if="${#lists.isEmpty(pages)}">
+        <!--        if pages aren't -->
+        <input type="number" id="menuSequence" name="menuSequence" th:value="1" hidden/>
+    </th:block>
+    <th:block th:unless="${#lists.isEmpty(pages)}">
+        <!--if pages are -->
+        <th:block th:unless="${currentMenuSequence == null}">
+            <!--        this condition is when edit operation-->
+            <p>Մենյուի դիրքը</p>
+            <select class="custom-select" id="menuSequence" name="menuSequence" multiple>
+                <option th:each="pg, i : ${pages}"
+                        th:value="${pg.menuSequence}"
+                        th:selected="(${pg.menuSequence} == ${currentMenuSequence})"
+                        th:text="${pg.menuSequence}==${currentMenuSequence} ? ${pg.menuSequence}+'․ '+${pg.menuName} + '-ը իր տեղում պահել' : ${pg.menuSequence}+'․ '+${pg.menuName} + ${currentMenuSequence}+'-ից առաջ'">
+                </option>
+                <option th:value="${#lists.size(pages)} + 1"> կցել վերջում</option>
+            </select>
+        </th:block>
+
+
+        <th:block th:if="${currentMenuSequence == null}">
+            <!--        this condition is when add new page operation-->
+            <p>Մենյուի դիրքը</p>
+            <select class="custom-select" id="menuSequence" name="menuSequence" multiple>
+                <option th:each="pg, i : ${pages}"
+                        th:value="${pg.menuSequence}"
+                        th:text="${pg.menuSequence}==*{menuSequence} ? ${pg.menuSequence}+'․ '+${pg.menuName} + ' իր տեղում պահել' : ${pg.menuSequence}+'․ '+${pg.menuName} + '-ից առաջ'">
+                </option>
+                <option th:value="${#lists.size(pages)} + 1" selected> կցել վերջում</option>
+            </select>
+
+        </th:block>
+    </th:block>
+
+
+</div>
+<!--END-->
+</body>
+</html>

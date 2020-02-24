@@ -1,0 +1,48 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Panel Main Page</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+<!--    <link href="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">-->
+<!--    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>-->
+<!--    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>-->
+</head>
+<body>
+
+    <!--PAGES TABLE-->
+    <table class="table" th:fragment="table-by-pages">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col"> Title</th>
+            <th scope="col"> Menu Name</th>
+            <th scope="col">Page lang</th>
+            <th scope="col">Lang Id</th>
+            <th scope="col">Hidden</th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${pages.empty}">
+            <td colspan="2"> No Pagess Available</td>
+        </tr>
+        <tr th:each="page, i : ${pages}">
+            <td><span th:text="${i.index +1}"> nom </span></td>
+            <td><span th:text="${page?.title}"> Title </span></td>
+            <td><span th:text="${page.menuName}"> Menu Name </span></td>
+            <td><span th:utext="${page.lang}"> page lang </span></td>
+            <td><span th:utext="${page.langId}">lang id</span></td>
+            <td><span th:utext="${page.hidden}"> true or false </span></td>
+            <td><a href="#" th:href="@{/(id=${page.langId},lang=${page.lang})}"><span class="glyphicon glyphicon-eye-open"> </span></a></td>
+            <td><a href="#" th:href="@{new-page(id=${page.id})}"><span class="glyphicon glyphicon-pencil"></span></a>
+            </td>
+            <td><a onclick="return confirm('Are you sure delete page?')" th:href="@{delete-page(id=${page.id})}"><span
+                    class="glyphicon glyphicon-remove-circle"></span></a></td>
+        </tr>
+        </tbody>
+    </table>
+    <!--END PAGES TABLE-->
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Page Redactor</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <!--    <script src="https://cdn.ckeditor.com/ckeditor5/16.0.0/classic/ckeditor.js"></script>-->
+    <!-- include libraries(jQuery, bootstrap) -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <!-- include summernote css/js -->
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.15/dist/summernote.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.15/dist/summernote.min.js"></script>
+</head>
+<body>
+<br>
+<div class="container">
+    <p>Ադմինի սկիզբ
+        <a th:href="@{main}" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-home"></span></a>
+    </p>
+    <form th:action="@{add-page}" th:object="${page}" method="post">
+        <ul th:if="${#fields.hasAnyErrors()}" class="alert alert-danger" role="alert">
+            <li th:each="err : ${#fields.allErrors()}" th:text="${err}">...</li>
+        </ul>
+        <!--    error show other way-->
+        <!--    <ul th:if="${#fields.hasErrors('*')}">-->
+        <!--        <li th:each="err : ${#fields.errors('*')}" th:text="${err}">Input is incorrect</li>-->
+        <!--    </ul>-->
+        <div style="float: right">
+            <p>էջի լեզուն <span class="text-danger">*</span></p>
+            <select th:field="*{lang}" id="lang">
+                <option value=""> --</option>
+                <option th:each="ln : ${T(com.card.website.domain.Page.Lang).values()}"
+                        th:value="${ln}" th:utext="${ln}"/>
+            </select>
+            <span class="text-danger" th:if="${#fields.hasErrors('lang')}" th:errors="*{lang}">Name Error</span>
+            <p>Մենյուի անվանումը <span class="text-danger">*</span></p>
+            <input type="text" th:field="*{menuName}"/>
+            <span th:if="${#fields.hasErrors('menuName')}" th:errors="*{menuName}" class="text-danger">Name Error</span>
+
+            <!--            if pages isn"t exist we in new page mode. so we don,t need menu sequence-->
+            <div id="menuSequenceData">
+                <th:block th:if="${#lists.isEmpty(pages)}">
+                    <input type="number" id="menuSequence" name="menuSequence" th:value="1" hidden/>
+                </th:block>
+                <th:block th:unless="${#lists.isEmpty(pages)}">
+                    <p>Մենյուի դիրքը</p>
+                    <select class="custom-select" th:field="*{menuSequence}" multiple>
+                        <option th:each="pg : ${pages}"
+                                th:value="${pg.menuSequence}"
+                                th:text="${pg.menuSequence}==*{menuSequence} ? ${pg.menuSequence}+'․ '+${pg.menuName} + ' իր տեղում պահել' : ${pg.menuSequence}+'․ '+${pg.menuName} + '-ից առաջ'">
+                        </option>
+                        <option th:value="${#lists.size(pages)} + 1"> կցել վերջում</option>
+                    </select>
+                </th:block>
+            </div>
+        </div>
+
+        <input hidden type="text" th:field="*{id}"/>
+        <p>page title</p>    <input type="text" th:field="*{title}"/>
+        <p>page description</p>    <input type="text" th:field="*{description}"/>
+        <p>page keywords</p>    <input type="text" th:field="*{keywords}"/>
+        <p>language id <span class="text-danger">*</span></p><input type="text" th:field="*{langId}" th:errorclass="fieldError"/>
+        <span th:if="${#fields.hasErrors('langId')}" th:errors="*{langId}" class="text-danger">Name Error</span>
+        <p>visibility</p>
+        <input type="checkbox" th:field="*{hidden}" />
+        <label th:for="${#ids.prev('hidden')}">hidden</label>
+        <p>create date</p><input type="datetime-local" th:field="*{beginDate}"/>
+
+        <th:block th:if="*{beginDate}">
+            <p>edit date</p><input type="datetime-local" th:field="*{editDate}"/>
+        </th:block>
+
+        <p>content</p>   <textarea th:class="editor" type="" th:field="*{content}"/></textarea>
+
+
+        <p><input type="submit" value="Submit"/> <input type="reset" value="Reset"/></p>
+    </form>
+</div>
+<script th:inline="javascript">
+    $(document).ready(function () {
+        //turning on mce
+        $('.editor').summernote();
+        //get menu sequence
+        $("#lang").change(function () {
+            var selectedLang = $(this).children("option:selected").val();
+            var base_url = window.location.origin;
+            var msequence = "";
+            // when selected lang is different from current edited page lang > then current menu sequence have noting on other languages sequence
+            [# th:unless="${pages==null}"]
+            if (selectedLang == '[[${page.lang}]]') {
+                msequence = [[${page.menuSequence}]];
+            }
+            [/]
+           $('#menuSequenceData').load(base_url + '/adminpanel/get-sequence?lang=' + selectedLang + '&msequence='+msequence); // url
+
+        });
+    })
+    ;
+
+</script>
+</body>
+</html>
