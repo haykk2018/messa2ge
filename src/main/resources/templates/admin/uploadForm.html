@@ -1,0 +1,36 @@
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title>Upload file</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="/webjars/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/webjars/jquery/3.4.1/jquery.min.js"></script>
+    <script src="/webjars/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container">
+<p>Ադմինի սկիզբ
+    <a th:href="@{main}" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-home"></span></a>
+</p>
+<div th:if="${message}">
+    <h2 th:text="${message}"/>
+</div>
+<br>
+<div>
+    <form method="POST" enctype="multipart/form-data" th:action="@{upload}">
+        <table>
+            <tr><td>File to upload:</td><td><input type="file" name="file" class="custom-file-input"  /></td></tr>
+            <tr><td></td><td><br><input type="submit" value="Upload"  class="btn"/></td></tr>
+        </table>
+    </form>
+</div>
+<div>
+    <ul>
+        <li th:each="file : ${files}">
+            <a th:href="${file}" th:text="${file}" />
+            <img th:if="${file.contains('.jpg')||file.contains('.png')||file.contains('.gif')||file.contains('.ico')||file.contains('.jpeg')}" th:src="${file}" width="42" height="42">
+        </li>
+    </ul>
+</div>
+</div>
+</body>
+</html>
