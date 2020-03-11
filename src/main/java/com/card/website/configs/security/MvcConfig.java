@@ -22,15 +22,17 @@ import java.util.Locale;
 public class MvcConfig implements WebMvcConfigurer {
 
     private static final String[] CLASSPATH_RESOURCE_LOCATIONS = {
-            "classpath:/static/upload", "classpath:/static/js",
-            "classpath:/static/img", "classpath:/static/css" };
+            "classpath:/static/upload","classpath:/static/js",
+            "classpath:/static/img","classpath:/static/css","/webjars/bootstrap","/webjars/jquery" };
 
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/login").setViewName("login");
     }
+    // path for show the files without the login, you must add it from security config too
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry){
         registry.addResourceHandler("/static/**").addResourceLocations(CLASSPATH_RESOURCE_LOCATIONS);
+        registry.addResourceHandler("/webjars/**").addResourceLocations(CLASSPATH_RESOURCE_LOCATIONS);
         registry.addResourceHandler("/**")
                 .addResourceLocations("file://" + new StorageProperties().getLocation() + "/");
     }

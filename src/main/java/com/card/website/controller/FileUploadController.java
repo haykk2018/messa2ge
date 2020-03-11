@@ -14,8 +14,6 @@ import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBui
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
@@ -31,13 +29,6 @@ public class FileUploadController {
 
     @GetMapping(path = "adminpanel/upload")
     public String listUploadedFiles(Model model) throws IOException {
-
-        Map map=new HashMap();
-        //Adding elements to map
-        map.put(1,"Amit");
-        map.put(5,"Rahul");
-        map.put(2,"Jai");
-        map.put(6,"Amit");
 
         model.addAttribute("files", storageService.loadAll().map(
                 path -> MvcUriComponentsBuilder.fromMethodName(FileUploadController.class,
