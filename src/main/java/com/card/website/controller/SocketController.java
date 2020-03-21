@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
 import java.io.IOException;
-import java.time.LocalTime;
 import java.util.Map;
 import java.util.Optional;
 
@@ -28,14 +27,7 @@ public class SocketController {
     //      admin panel first page
     @GetMapping(path = "/main")
     public String socketAdmin(Map<String, Object> model) {
-        //test
 
-        Node node = new Node();
-        node.setStartDailyTime(LocalTime.now());
-        node.setChildId("dfg");
-        node.setParentId("parentId");
-        nodeRepository.save(node);
-        //end
         Iterable<Node> nodes = nodeRepository.findAll();
 
         model.put("nodes", nodes);
