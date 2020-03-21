@@ -49,7 +49,7 @@
         </thead>
         <tbody>
         <tr th:if="${pages.empty}">
-            <td colspan="2"> No Pagess Available</td>
+            <td colspan="2"> No Pages Available</td>
         </tr>
         <tr th:each="page, i : ${pages}">
             <td><span th:text="${i.index +1}"> nom </span></td>
@@ -59,7 +59,7 @@
             <td><span th:utext="${page.langId}">lang id</span></td>
             <td><span th:utext="${page.hidden}"> true or false </span></td>
             <td><a href="#" th:href="@{/(id=${page.langId},lang=${page.lang})}"><span class="glyphicon glyphicon-eye-open"> </span></a></td>
-            <td><a href="#" th:href="@{new-page(id=${page.id})}"><span class="glyphicon glyphicon-pencil"></span></a>
+            <td><a href="#" th:href="@{new-page(id=${page.id})}"><span class="glyphicon glyphicon-pencil" ></span></a>
             </td>
             <td><a onclick="return confirm('Are you sure delete page?')" th:href="@{delete-page(id=${page.id})}"><span
                     class="glyphicon glyphicon-remove-circle"></span></a></td>
@@ -82,8 +82,8 @@
     $(document).ready(function () {
         $("#lang").change(function () {
             var selectedLang = $(this).children("option:selected").val();
-            var base_url = window.location.origin;
-            $('#pagesDiv').load( base_url + '/adminpanel/get-pages?lang='+selectedLang, // url
+            var home_url = window.location.origin;
+            $('#pagesDiv').load( home_url + '/adminpanel/get-pages?lang='+selectedLang, // url
            //     { lang: selectedLang },    // data
            //      function(data, status, jqXGR) {  // callback function
            //          alert('data loaded' + data)

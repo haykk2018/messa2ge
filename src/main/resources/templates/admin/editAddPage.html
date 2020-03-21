@@ -88,7 +88,7 @@
         //get menu sequence
         $("#lang").change(function () {
             var selectedLang = $(this).children("option:selected").val();
-            var base_url = window.location.origin;
+            var home_url = window.location.origin;
             var msequence = "";
             // when selected lang is different from current edited page lang > then current menu sequence have noting on other languages sequence
             [# th:unless="${pages==null}"]
@@ -96,7 +96,7 @@
                 msequence = [[${page.menuSequence}]];
             }
             [/]
-           $('#menuSequenceData').load(base_url + '/adminpanel/get-sequence?lang=' + selectedLang + '&msequence='+msequence); // url
+           $('#menuSequenceData').load(home_url + '/adminpanel/get-sequence?lang=' + selectedLang + '&msequence='+msequence); // url
 
         });
     })

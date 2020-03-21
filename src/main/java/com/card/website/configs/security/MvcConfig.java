@@ -22,8 +22,8 @@ import java.util.Locale;
 public class MvcConfig implements WebMvcConfigurer {
 
     private static final String[] CLASSPATH_RESOURCE_LOCATIONS = {
-            "classpath:/static/upload","classpath:/static/js",
-            "classpath:/static/img","classpath:/static/css","/webjars/bootstrap","/webjars/jquery" };
+            "classpath:/static/upload","classpath:/static/js","classpath:/static/socket-client","/webjars/socket-client",
+            "classpath:/static/img","classpath:/static/css","/webjars/bootstrap","/webjars/jquery","/webjars/sockjs-client" };
 
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/login").setViewName("login");

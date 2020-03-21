@@ -1,0 +1,161 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Socket Admin Page</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <link href="/webjars/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/webjars/jquery/3.4.1/jquery.min.js"></script>
+    <script src="/webjars/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <!--LOGIN-->
+    <div style="float: right">
+        <h1 th:inline="text">Hello [[${#httpServletRequest.remoteUser}]]!</h1>
+        <form method="post" th:action="@{/logout}">
+            <input class="btn btn-primary" type="submit" value="Sign Out"/>
+        </form>
+    </div>
+    <!--END LOGIN-->
+    <h1>հանգույցների կառավարման մաս</h1>
+    <br>
+
+    <!--PAGES TABLE-->
+    <div id="nodesDiv">
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col"> Node name</th>
+                <th scope="col">Parent Id</th>
+                <th scope="col">Child id</th>
+                <th scope="col">Start Time</th>
+                <th scope="col">End Time</th>
+                <th scope="col">Բաց է հիմա</th>
+                <th scope="col"></th>
+                <th scope="col"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${nodes.empty}">
+                <td colspan="2"> No Nodes Available</td>
+            </tr>
+            <tr th:each="node, i : ${nodes}">
+                <td><span th:text="${i.index +1}"> nom </span></td>
+                <td><span th:text="${node.nodeNick}"> Node name </span></td>
+                <td><span th:text="${node.parentId}">Parent Id</span></td>
+                <td><span th:utext="${node.childId}"> Child id </span></td>
+                <td><input th:type="time" th:value="${node.startDailyTime}" disabled></td>
+                <td><input th:type="time" th:value="${node.endDailyTime}" disabled></td>
+                <td><span th:utext="${node.opened}"> true or false </span></td>
+                <td>
+                    <span th:if="${node.endDailyTime}" >
+                        <span class="glyphicon glyphicon-pencil edit"  style="cursor: pointer;" th:href="${node.id}"></span>&nbsp;
+                        <a th:href="@{disable(id=${node.id})}">անջատել</a>
+                    </span>
+                    <a th:unless="${node.endDailyTime}" class="edit" th:href="${node.id}">
+                        <span>ծորակը միացնել</span>
+                    </a>
+                </td>
+                <!--                <td th:unless="${node.endDailyTime}"><a href="#"-->
+                <!--                                                        th:href="@{/(id=${node.childId},lang=${node.childId})}">-->
+                <!--                    <span>ծորակը միացնել</span>-->
+                <!--                </a></td>-->
+                <td><a href="#" class="waterToggle" alt="click to start water"
+                       th:attr="data-parent-id=${node.parentId},data-child-id=${node.childId}">
+                    <img src="/static/img/no-water.png" width="20" height="20">
+                </a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-md-4">
+            <a class="btn btn-primary" href="#" onclick="$.ajax('/socket/init-child');">Նոր հանգույցի ավելացում</a>
+        </div>
+        <div class="col-md-4 col-md-offset-4">
+            <a class="btn btn-primary" href="#" onclick="$.ajax('/socket/init');">Հանգույցների վերահաստատում</a>
+        </div>
+    </div>
+</div>
+<br>
+<!-- Modal -->
+<div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Node Data</h4>
+            </div>
+            <div class="modal-body" id="nodeContent">
+                <p>Some text in the modal.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!--End Modal -->
+<script th:inline="javascript">
+    $(document).ready(function () {
+        const home_url = window.location.origin;
+        // edit node
+        $(".edit").on("click", function (event) {
+            event.preventDefault();
+
+            let id = $(this).attr("href");
+            $("#nodeContent").load(home_url + '/socket/get-node?id=' + id, function () {
+                ajaxPost();
+            });
+            $('#myModal').modal('show');
+
+        })
+
+        function ajaxPost() {
+            $("form").on("submit", function (event) {
+                event.preventDefault();
+                let id = $(this).attr("href");
+                $.post(home_url + '/socket/save-node', $("form").serialize())
+                    .done(function (data) {
+                        if (data == "<div>saveSuccess</div>") {
+                            window.location.href = home_url + '/socket/main';
+                        } else {
+                            $("#nodeContent").html(data);
+                            ajaxPost();
+                        }
+
+                    });
+            })
+        }
+
+        //  toggle part
+        let click = false;
+        $(".waterToggle").click(function () {
+            click = !click;
+            if (click) {
+                $(this).find("img").attr("src", "/static/img/giphy.gif");
+                startWater($(this).data("parent-id"), $(this).data("child-id"));
+            } else {
+                $(this).find("img").attr("src", "/static/img/no-water.png");
+                endWater($(this).data("parent-id"), $(this).data("child-id"));
+            }
+        });
+
+        function startWater(parentId, childId) {
+            $.ajax(home_url + '/socket/start?parentId=' + parentId + '&childId=' + childId)
+        };
+
+        function endWater(parentId, childId) {
+            $.ajax(home_url + '/socket/stop?parentId=' + parentId + '&childId=' + childId)
+        };
+    })
+    ;
+</script>
+</body>
+</html>
