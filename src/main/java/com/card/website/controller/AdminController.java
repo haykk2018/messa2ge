@@ -38,7 +38,8 @@ public class AdminController {
     public String pageAdd(@Valid Page page, BindingResult bindingResult) {
 
         //validating unique filds
-        if (pageRepository.existsByLangAndLangId(page.getLang(), page.getLangId())) {
+        //if we check it when pages create, is'nt necessity to check it by edit
+        if (page.getId() == null && pageRepository.existsByLangAndLangId(page.getLang(), page.getLangId())) {
             bindingResult.rejectValue("langId", "messageCode", "The field must be unique. Page with your value already exist ");
         }
         if (bindingResult.hasErrors()) {
@@ -50,12 +51,37 @@ public class AdminController {
         } else {
             page.setEditDate(new Date());
         }
-        //if menu sequence isn't changed we dun't push the sequence
-        if (page.getId() != null && page.getMenuSequence() != pageRepository.findById(page.getId()).get().getMenuSequence()) {
-            pageRepository.pushSequenceOneStep(page.getMenuSequence(), page.getLang());
+        //if menu sequence isn't changed we dun't push the sequence։ two case
+        //1 create new page, when isn't exist page with current menu sequence in database
+        //2 edit page, when page menu sequence remains the same
+        Page pageWhichPlaceWillToSave = pageRepository.findByLangAndMenuSequence(page.getLang(), page.getMenuSequence());
+
+
+        if (page.getId() == null && pageWhichPlaceWillToSave != null) {
+            //in this case we add new page, and isn,t exist old page, and us didn't need old page
+            menuSequenceDisposer(page, null);
         }
+        else if (page.getId() != null && (pageWhichPlaceWillToSave == null || (pageWhichPlaceWillToSave != null && pageWhichPlaceWillToSave.getId() != page.getId()))) {
+            Page oldPage = pageRepository.findById(page.getId()).get();
+            menuSequenceDisposer(page, oldPage.getMenuSequence());
+        }
+
         pageRepository.save(page);
         return "redirect:/adminpanel/main";
+    }
+
+    void menuSequenceDisposer(Page page, Integer oldPageMenuSequence) {
+        //when we add new page we need only to push +1
+        if (oldPageMenuSequence == null) {
+            pageRepository.pushSequenceOneStep(page.getMenuSequence(), page.getLang());
+        }
+        //   oldPageMenuSequence can't be equal menuSequence, because that case we already excluded
+        else if (oldPageMenuSequence > page.getMenuSequence()) {
+            pageRepository.pushSequenceOneStep(page.getMenuSequence(), oldPageMenuSequence, page.getLang());
+        } else if (oldPageMenuSequence < page.getMenuSequence()) {
+            pageRepository.pushSequenceOneStepToBack(page.getMenuSequence(), oldPageMenuSequence-1, page.getLang());
+            page.setMenuSequence(page.getMenuSequence()-1);
+        }
     }
 
     //      delete page
@@ -113,4 +139,5 @@ public class AdminController {
         model.put("pages", pages);
         return "admin/ajaxSequensesByLang :: menu-sequense";
     }
+
 }
