@@ -14,7 +14,7 @@
     <div style="float: right">
         <h1 th:inline="text">Hello [[${#httpServletRequest.remoteUser}]]!</h1>
         <form method="post" th:action="@{/logout}">
-            <input class="btn btn-primary" type="submit" value="Sign Out"/>
+            <input class="form-control btn btn-primary" type="submit" value="Sign Out"/>
         </form>
     </div>
     <!--END LOGIN-->
@@ -22,63 +22,70 @@
     <br>
 
     <!--PAGES TABLE-->
-    <div id="nodesDiv">
-        <table class="table">
-            <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col"> Node name</th>
-                <th scope="col">Parent Id</th>
-                <th scope="col">Child id</th>
-                <th scope="col">Start Time</th>
-                <th scope="col">End Time</th>
-                <th scope="col">Բաց է հիմա</th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:if="${nodes.empty}">
-                <td colspan="2"> No Nodes Available</td>
-            </tr>
-            <tr th:each="node, i : ${nodes}">
-                <td><span th:text="${i.index +1}"> nom </span></td>
-                <td><span th:text="${node.nodeNick}"> Node name </span></td>
-                <td><span th:text="${node.parentId}">Parent Id</span></td>
-                <td><span th:utext="${node.childId}"> Child id </span></td>
-                <td><input th:type="time" th:value="${node.startDailyTime}" disabled></td>
-                <td><input th:type="time" th:value="${node.endDailyTime}" disabled></td>
-                <td><span th:utext="${node.opened}"> true or false </span></td>
-                <td>
-                    <span th:if="${node.endDailyTime}" >
-                        <span class="glyphicon glyphicon-pencil edit"  style="cursor: pointer;" th:href="${node.id}"></span>&nbsp;
+    <div id="nodesDiv" th:fragment="all-nodes">
+        <br>
+        <div th:if="${parents}" th:each="parent, i : ${parents}">
+            <table class="table">
+                <thead>
+                <tr class="info">
+                    <th colspan=3></th>
+                    <th align="center">
+                        <span th:if="${parent.parentNick}">Parent Name: </span><span th:text="${parent.parentNick}"> Par name </span>
+                    </th>
+                    <th>
+                        Parent Id: <span th:text="${parent.parentId}" class="parentId">Parent Id </span>
+                    </th>
+                    <th colspan=3>
+                        <a class="editParent" th:href="${parent.id}">
+                            <span class="glyphicon glyphicon-pencil"></span>
+                        </a>
+                        &nbsp;
+                        <a onclick="return confirm('Համոզվա՞ծ եք?')" th:href="@{deleteParent(parentId=${parent.parentId},id=${parent.id})}">
+                            <span class="glyphicon glyphicon-remove-circle"></span>
+                        </a>
+                    </th>
+                </tr>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col"> Node name</th>
+                    <th scope="col">Child id</th>
+                    <th scope="col">Start Time</th>
+                    <th scope="col">End Time</th>
+                    <th scope="col">Բաց է հիմա</th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="node, i : ${parent?.nodes}">
+                    <td><span th:text="${i.index +1}"> nom </span></td>
+                    <td><span th:text="${node.nodeNick}"> Node name </span></td>
+                    <td><span th:utext="${node.childId}"> Child id </span></td>
+                    <td><input class="form-control" th:type="time" th:value="${node.startDailyTime}" disabled></td>
+                    <td><input class="form-control" th:type="time" th:value="${node.endDailyTime}" disabled></td>
+                    <td><span th:utext="${node.opened}"> true or false </span></td>
+                    <td>
+                    <span th:if="${node.endDailyTime}">
+                        <span class="glyphicon glyphicon-pencil edit" style="cursor: pointer;"
+                              th:href="${node.id}"></span>&nbsp;
                         <a th:href="@{disable(id=${node.id})}">անջատել</a>
                     </span>
-                    <a th:unless="${node.endDailyTime}" class="edit" th:href="${node.id}">
-                        <span>ծորակը միացնել</span>
-                    </a>
-                </td>
-                <!--                <td th:unless="${node.endDailyTime}"><a href="#"-->
-                <!--                                                        th:href="@{/(id=${node.childId},lang=${node.childId})}">-->
-                <!--                    <span>ծորակը միացնել</span>-->
-                <!--                </a></td>-->
-                <td><a href="#" class="waterToggle" alt="click to start water"
-                       th:attr="data-parent-id=${node.parentId},data-child-id=${node.childId}">
-                    <img src="/static/img/no-water.png" width="20" height="20">
-                </a></td>
-            </tr>
-            </tbody>
-        </table>
+                        <a th:unless="${node.endDailyTime}" class="edit" th:href="${node.id}">
+                            <span>ծորակը միացնել</span>
+                        </a>
+                    </td>
+                    <td><a href="#" class="waterToggle" alt="click to start water"
+                           th:attr="data-parent-id=${parent.parentId},data-child-id=${node.childId}">
+                        <img src="/static/img/no-water.png" width="20" height="20">
+                    </a></td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
     </div>
+    <!--PAGES TABLE END-->
     <br>
-    <div class="row">
-        <div class="col-md-4">
-            <a class="btn btn-primary" href="#" onclick="$.ajax('/socket/init-child');">Նոր հանգույցի ավելացում</a>
-        </div>
-        <div class="col-md-4 col-md-offset-4">
-            <a class="btn btn-primary" href="#" onclick="$.ajax('/socket/init');">Հանգույցների վերահաստատում</a>
-        </div>
-    </div>
 </div>
 <br>
 <!-- Modal -->
@@ -89,10 +96,10 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Node Data</h4>
+                <h4 class="modal-title">խմբագրում</h4>
             </div>
             <div class="modal-body" id="nodeContent">
-                <p>Some text in the modal.</p>
+                <p></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -104,11 +111,19 @@
 <!--End Modal -->
 <script th:inline="javascript">
     $(document).ready(function () {
+        loadScriptsFunc();
+        setInterval(function () {
+            $("#nodesDiv").load('/socket/mainAjax', function () {
+                loadScriptsFunc();
+            });
+        }, 6000);
+    });
+
+    function loadScriptsFunc() {
         const home_url = window.location.origin;
         // edit node
         $(".edit").on("click", function (event) {
             event.preventDefault();
-
             let id = $(this).attr("href");
             $("#nodeContent").load(home_url + '/socket/get-node?id=' + id, function () {
                 ajaxPost();
@@ -121,7 +136,7 @@
             $("form").on("submit", function (event) {
                 event.preventDefault();
                 let id = $(this).attr("href");
-                $.post(home_url + '/socket/save-node', $("form").serialize())
+                $.post(event.target.action, $("form").serialize())
                     .done(function (data) {
                         if (data == "<div>saveSuccess</div>") {
                             window.location.href = home_url + '/socket/main';
@@ -134,7 +149,14 @@
             })
         }
 
-        //  toggle part
+        $(".editParent").click(function (event) {
+            event.preventDefault();
+            $('#myModal').modal('show');
+            let id = $(this).attr("href");
+            $("#nodeContent").load(home_url + '/socket/get-parent?id=' + id, function () {
+                ajaxPost();
+            });
+        })
         let click = false;
         $(".waterToggle").click(function () {
             click = !click;
@@ -154,8 +176,7 @@
         function endWater(parentId, childId) {
             $.ajax(home_url + '/socket/stop?parentId=' + parentId + '&childId=' + childId)
         };
-    })
-    ;
+    }
 </script>
 </body>
 </html>

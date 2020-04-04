@@ -5,25 +5,29 @@
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
 </head>
 <body>
-<form th:action="@{save-xx}" th:fragment="edit-node" th:object="${node}" method="post" th:id="form">
-    <ul th:if="${#fields.hasAnyErrors()}" class="alert alert-danger" role="alert">
-        <li th:each="err : ${#fields.allErrors()}" th:text="${err}">...</li>
-    </ul>
+<form class="" th:action="@{save-node}" th:fragment="edit-node" th:object="${node}" method="post" th:id="form">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <ul th:if="${#fields.hasAnyErrors()}" class="alert alert-danger" role="alert">
+                <li th:each="err : ${#fields.allErrors()}" th:text="${err}">...</li>
+            </ul>
 
-    <input hidden type="text" th:field="*{id}"/>3
-    <p>Հանգույցի Անվանումը</p>
-    <input type="text" th:field="*{nodeNick}" required/>
-    <span th:if="${#fields.hasErrors('nodeNick')}" th:errors="*{nodeNick}" class="text-danger">Name Error</span>
+            <input hidden type="text" th:field="*{id}"/>
+            <input hidden type="text" th:field="*{parent}"/>
+            <p>Հանգույցի Անվանումը</p>
+            <input type="checkbox" th:name="opened" th:id="opened" th:value="false" hidden/>
+            <input class="form-control" type="text" th:field="*{nodeNick}" required/>
+            <span th:if="${#fields.hasErrors('nodeNick')}" th:errors="*{nodeNick}" class="text-danger">Name Error</span>
+
+            <p>Child Id</p>    <input class="form-control" type="text" th:field="*{childId}" readonly>
+            <p>Start Time</p>    <input class="form-control" th:type="time" th:field="*{startDailyTime}" required/>
+            <p>End Time</p>    <input class="form-control" th:type="time" th:field="*{endDailyTime}" required/>
+            <br><br>
+            <p>
+                <input class="btn btn-primary" th:id="submit" type="submit" value="Submit"/>
+                <input class="btn btn-primary" type="reset" value="Reset"/></p>
+        </div>
     </div>
-
-    <p>Parent Id</p>    <input type="text" th:field="*{parentId}" readonly/>
-    <p>Child Id</p>    <input type="text" th:field="*{childId}" readonly>
-    <p>Start Time</p>    <input type="time" th:field="*{startDailyTime}" required/>
-    <p>End Time</p>    <input type="time" th:field="*{endDailyTime}" required/>
-    <br><br>
-    <p>
-        <input th:id="submit" type="submit" value="Submit"/>
-        <input type="reset" value="Reset"/></p>
 </form>
 <div th:fragment="saveSuccess">saveSuccess</div>
 </body>

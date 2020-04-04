@@ -39,13 +39,13 @@
             </select>
             <span class="text-danger" th:if="${#fields.hasErrors('lang')}" th:errors="*{lang}">Name Error</span>
             <p>Մենյուի անվանումը <span class="text-danger">*</span></p>
-            <input type="text" th:field="*{menuName}"/>
+            <input class="form-control" type="text" th:field="*{menuName}"/>
             <span th:if="${#fields.hasErrors('menuName')}" th:errors="*{menuName}" class="text-danger">Name Error</span>
 
             <!--            if pages isn"t exist we in new page mode. so we don,t need menu sequence-->
             <div id="menuSequenceData">
                 <th:block th:if="${#lists.isEmpty(pages)}">
-                    <input type="number" id="menuSequence" name="menuSequence" th:value="1" hidden/>
+                    <input class="form-control" type="number" id="menuSequence" name="menuSequence" th:value="1" hidden/>
                 </th:block>
                 <th:block th:unless="${#lists.isEmpty(pages)}">
                     <p>Մենյուի դիրքը</p>
@@ -61,24 +61,24 @@
         </div>
 
         <input hidden type="text" th:field="*{id}"/>
-        <p>page title</p>    <input type="text" th:field="*{title}"/>
-        <p>page description</p>    <input type="text" th:field="*{description}"/>
-        <p>page keywords</p>    <input type="text" th:field="*{keywords}"/>
-        <p>language id <span class="text-danger">*</span></p><input type="text" th:field="*{langId}" th:errorclass="fieldError"/>
+        <p>page title</p>    <input class="form-control" type="text" th:field="*{title}"/>
+        <p>page description</p>    <input class="form-control" type="text" th:field="*{description}"/>
+        <p>page keywords</p>    <input class="form-control" type="text" th:field="*{keywords}"/>
+        <p>language id <span class="text-danger">*</span></p><input class="form-control" type="text" th:field="*{langId}" th:errorclass="fieldError"/>
         <span th:if="${#fields.hasErrors('langId')}" th:errors="*{langId}" class="text-danger">Name Error</span>
         <p>visibility</p>
-        <input type="checkbox" th:field="*{hidden}" />
+        <input class="form-control" type="checkbox" th:field="*{hidden}" />
         <label th:for="${#ids.prev('hidden')}">hidden</label>
-        <p>create date</p><input type="datetime-local" th:field="*{beginDate}"/>
+        <p>create date</p><input class="form-control" type="datetime-local" th:field="*{beginDate}"/>
 
         <th:block th:if="*{beginDate}">
-            <p>edit date</p><input type="datetime-local" th:field="*{editDate}"/>
+            <p>edit date</p><input class="form-control" type="datetime-local" th:field="*{editDate}"/>
         </th:block>
 
         <p>content</p>   <textarea th:class="editor" type="" th:field="*{content}"/></textarea>
 
 
-        <p><input type="submit" value="Submit"/> <input type="reset" value="Reset"/></p>
+        <p><input class="btn btn-primary" type="submit" value="Submit"/> <input class="btn btn-primary" type="reset" value="Reset"/></p>
     </form>
 </div>
 <script th:inline="javascript">

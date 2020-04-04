@@ -25,7 +25,7 @@ function connect() {
     //         showGreeting(JSON.parse(greeting.body).content);
     //     });
     // });
-    ws = new WebSocket('ws://localhost:8080/name');
+    ws = new WebSocket($("#hostName").val());
     ws.onmessage = function(data){
         showGreeting(data.data);
     }
@@ -47,7 +47,9 @@ function disconnect() {
 
 function sendName() {
     // stompClient.send("/app/hello", {}, JSON.stringify({'name': $("#name").val()}));
+    //ws.send($("#name").val());
     ws.send($("#name").val());
+
 }
 
 function sendTextWithoutJson() {
