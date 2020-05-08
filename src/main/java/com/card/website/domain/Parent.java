@@ -6,7 +6,6 @@ import javax.validation.constraints.Size;
 import java.util.List;
 
 @Entity // This tells Hibernate to make a table out of this class
-
 public class Parent {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -21,7 +20,7 @@ public class Parent {
     private String parentDescription;
 
 
-    @OneToMany(mappedBy= "parent", cascade = CascadeType.ALL, orphanRemoval=true)
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Node> nodes;
 
 
@@ -48,6 +47,7 @@ public class Parent {
     public void setParentId(String parentId) {
         this.parentId = parentId;
     }
+
     public String getParentNick() {
         return parentNick;
     }
@@ -63,8 +63,6 @@ public class Parent {
     public void setParentDescription(String parentDescription) {
         this.parentDescription = parentDescription;
     }
-
-
 
 
 }

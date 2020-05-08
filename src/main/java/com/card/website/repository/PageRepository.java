@@ -5,13 +5,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 // This will be AUTO IMPLEMENTED by Spring into a Bean called userRepository
 // CRUD refers Create, Read, Update, Delete
-@Transactional
+
 public interface PageRepository extends CrudRepository<Page, Integer> {
 
     List<Page> findByLang(Page.Lang lang, Sort sort);

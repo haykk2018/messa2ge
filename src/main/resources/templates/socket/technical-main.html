@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Socket Admin Page</title>
+    <title>Node Management Page</title>
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
     <link href="/webjars/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <script src="/webjars/jquery/3.4.1/jquery.min.js"></script>
@@ -12,66 +12,68 @@
 <div class="container">
     <!--LOGIN-->
     <div style="float: right">
-        <h1 th:inline="text">Օգտատեր։ [[${#httpServletRequest.remoteUser}]]!</h1>
+        <h1 th:inline="text">Hello [[${#httpServletRequest.remoteUser}]]!</h1>
         <form method="post" th:action="@{/logout}">
-            <input class="form-control btn btn-primary" type="submit" value="Դուրս Գրվել"/>
+            <input class="form-control btn btn-primary" type="submit" value="Sign Out"/>
         </form>
     </div>
     <!--END LOGIN-->
-    <h1>Ռեժիմների կառավարման մաս</h1>
+    <h1>Node Management Page</h1>
     <br>
-    | <a href="" class="editregime">նոր խումբ <span class="glyphicon glyphicon-plus-sign"></span></a> |
+
     <!--PAGES TABLE-->
     <div id="nodesDiv" th:fragment="all-nodes">
         <br>
-        <div th:if="${regimes}" th:each="regime, i : ${regimes}">
-            <table class="table" th:attr="data-parent-id=${regime.parentId}">
+        <div th:if="${parents}" th:each="parent, i : ${parents}">
+            <table class="table">
                 <thead>
                 <tr class="info">
-                    <th colspan=3></th>
+                    <th colspan=3> Connection Status: <span th:text="${sessionByParId.get(parent.parentId)?.isOpen()}">Status</span> </th>
                     <th align="center">
-                        <span th:if="${regime.regimeNick}">Խմբի Անունը: </span><span th:text="${regime.regimeNick}">  name </span>
+                        <span th:if="${parent.parentNick}">Parent Name: </span><span th:text="${parent.parentNick}"> Par name </span>
                     </th>
                     <th>
-                        Խմբի Համարը: <span th:text="${regime.regimeId}" class="regimeId">regime Id </span>
+                        Parent Id: <span th:text="${parent.parentId}" class="parentId">Parent Id </span>
                     </th>
                     <th colspan=3>
-                        <a class="editregime" th:href="${regime.id}">
+                        <a class="editParent" th:href="${parent.id}">
                             <span class="glyphicon glyphicon-pencil"></span>
-                        </a>                        &nbsp;
-                        <a th:if="${regime.endDailyTime}" onclick="return confirm('Համոզվա՞ծ եք?')"
-                           th:href="@{delete-regime(parentId=${regime.parentId},id=${regime.id})}">
+                        </a>
+                        &nbsp;&nbsp;
+                        <a onclick="return confirm('Համոզվա՞ծ եք?')" th:href="@{deleteParent(parentId=${parent.parentId},id=${parent.id})}">
                             <span class="glyphicon glyphicon-remove-circle"></span>
                         </a>
                     </th>
                 </tr>
                 <tr>
                     <th scope="col">#</th>
-                    <th scope="col">Ծորակի Համարը</th>
-                    <th scope="col">վիճակը</th>
-                    <th scope="col" colspan=3></th>
+                    <th scope="col"> Node Name</th>
+                    <th scope="col">Child Id</th>
+<!--                    <th scope="col">Start Time</th>-->
+<!--                    <th scope="col">End Time</th>-->
+                    <th scope="col">Node Status</th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="node, i : ${regime?.nodes}">
+                <tr th:each="node, i : ${parent?.nodes}">
                     <td><span th:text="${i.index +1}"> nom </span></td>
+                    <td><span th:text="${node.nodeNick}"> Node name </span></td>
                     <td><span th:utext="${node.childId}"> Child id </span></td>
-                    <td th:switch="${node.status}">
-                        <span th:case="o" >բաց</span>
-                        <span th:case="c" >փակ</span>
-                        <span th:case="e" >սխալ</span>
-                    </td>
-                    <td colspan=3>
-                        <!--                    <span th:if="${node.endDailyTime}">-->
-                        <a class="glyphicon glyphicon-pencil edit"
-                              th:href="${node.id}"></a>&nbsp;
-<!--                        <a th:href="@{disable(id=${node.id})}">անջատել</a>-->
-                        <!--                    </span>-->
-                        <!--                        <a th:unless="${node.}" class="edit" th:href="${node.id}">-->
-                        <!--                            <span>ծորակը միացնել</span>-->
-                        <!--                        </a>-->
-                    </td>
+<!--                    <td><input class="form-control" th:type="time" th:value="${node.startDailyTime}" disabled></td>-->
+<!--                    <td><input class="form-control" th:type="time" th:value="${node.endDailyTime}" disabled></td>-->
+                    <td><span th:utext="${node.status}"> true or false </span></td>
+                    <td>
 
+                        <span class="glyphicon glyphicon-pencil edit" style="cursor: pointer;"
+                              th:href="${node.id}"></span>&nbsp;
+
+                    </td>
+<!--                    <td><a href="#" class="waterToggle" alt="click to start water"-->
+<!--                           th:attr="data-parent-id=${parent.parentId},data-child-id=${node.childId}">-->
+<!--                        <img src="/static/img/no-water.png" width="20" height="20">-->
+<!--                    </a></td>-->
                 </tr>
                 </tbody>
             </table>
@@ -106,21 +108,19 @@
 <script th:inline="javascript">
     $(document).ready(function () {
         loadScriptsFunc();
-        setInterval(function () {
-            $("#nodesDiv").load('/socket/mainAjax', function () {
-                loadScriptsFunc();
-            });
-        }, 60000);
+        // setInterval(function () {
+        //     $("#nodesDiv").load('/socket/mainAjax', function () {
+        //         loadScriptsFunc();
+        //     });
+        // }, 60000);
     });
 
     function loadScriptsFunc() {
         const home_url = window.location.origin;
-        var parentId;
         // edit node
         $(".edit").on("click", function (event) {
             event.preventDefault();
             let id = $(this).attr("href");
-            parentId = $(this).closest("table").data("parent-id");
             $("#nodeContent").load(home_url + '/socket/get-node?id=' + id, function () {
                 ajaxPost();
             });
@@ -135,8 +135,7 @@
                 $.post(event.target.action, $("form").serialize())
                     .done(function (data) {
                         if (data == "<div>saveSuccess</div>") {
-                            // $.ajax(home_url + '/socket/send-regimes?parentId=' + parentId);
-                            window.location.href = home_url + '/socket/main';
+                            window.location.href = home_url + '/socket/technical-main';
                         } else {
                             $("#nodeContent").html(data);
                             ajaxPost();
@@ -146,12 +145,11 @@
             })
         }
 
-        $(".editregime").click(function (event) {
+        $(".editParent").click(function (event) {
             event.preventDefault();
             $('#myModal').modal('show');
             let id = $(this).attr("href");
-            parentId = $(this).closest("table").data("parent-id");
-            $("#nodeContent").load(home_url + '/socket/get-regime?id=' + id, function () {
+            $("#nodeContent").load(home_url + '/socket/get-parent?id=' + id, function () {
                 ajaxPost();
             });
         })
@@ -160,19 +158,19 @@
             click = !click;
             if (click) {
                 $(this).find("img").attr("src", "/static/img/giphy.gif");
-                startWater($(this).data("regime-id"), $(this).data("child-id"));
+                startWater($(this).data("parent-id"), $(this).data("child-id"));
             } else {
                 $(this).find("img").attr("src", "/static/img/no-water.png");
-                endWater($(this).data("regime-id"), $(this).data("child-id"));
+                endWater($(this).data("parent-id"), $(this).data("child-id"));
             }
         });
 
-        function startWater(regimeId, childId) {
-            $.ajax(home_url + '/socket/start?regimeId=' + regimeId + '&childId=' + childId)
+        function startWater(parentId, childId) {
+            $.ajax(home_url + '/socket/start?parentId=' + parentId + '&childId=' + childId)
         };
 
-        function endWater(regimeId, childId) {
-            $.ajax(home_url + '/socket/stop?regimeId=' + regimeId + '&childId=' + childId)
+        function endWater(parentId, childId) {
+            $.ajax(home_url + '/socket/stop?parentId=' + parentId + '&childId=' + childId)
         };
     }
 </script>

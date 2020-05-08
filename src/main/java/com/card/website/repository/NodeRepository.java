@@ -4,8 +4,6 @@ import com.card.website.domain.Node;
 import com.card.website.domain.Parent;
 import org.springframework.data.repository.CrudRepository;
 
-import java.time.LocalTime;
-
 
 public interface NodeRepository extends CrudRepository<Node, Integer> {
 
@@ -13,11 +11,11 @@ public interface NodeRepository extends CrudRepository<Node, Integer> {
 
     Iterable<Node> findAllByParent(Parent p);
 
-    Iterable<Node> findAllByStartDailyTimeBeforeAndEndDailyTimeAfter(LocalTime time,LocalTime time2);
-
-    Iterable<Node> findAllByStartDailyTimeBeforeAndEndDailyTimeAfterAndOpenedFalse(LocalTime time,LocalTime time2);
-
-    Iterable<Node> findAllByStartDailyTimeAfterOrEndDailyTimeBeforeAndOpenedIsTrue(LocalTime time,LocalTime time2);
+//    Iterable<Node> findAllByStartDailyTimeBeforeAndEndDailyTimeAfter(LocalTime time,LocalTime time2);
+//
+//    Iterable<Node> findAllByStartDailyTimeBeforeAndEndDailyTimeAfterAndOpenedFalse(LocalTime time,LocalTime time2);
+//
+//    Iterable<Node> findAllByStartDailyTimeAfterOrEndDailyTimeBeforeAndOpenedIsTrue(LocalTime time,LocalTime time2);
 
     void deleteByParent(String parentId);
 
@@ -28,6 +26,5 @@ public interface NodeRepository extends CrudRepository<Node, Integer> {
     void deleteAllByParent(Parent parentId);
 
     Iterable<Parent> deleteAllByParentId(String p);
-
 
 }

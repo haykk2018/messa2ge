@@ -17,7 +17,7 @@
                 <input hidden type="text" th:field="*{nodes}"/>
                 <p></p>
 
-                <p>Հանգույցի Անվանումը</p>
+                <p>Ծնողի Անվանումը</p>
                 <input class="form-control" type="text" th:field="*{parentNick}" required/>
 
                 <span th:if="${#fields.hasErrors('parentNick')}" th:errors="*{parentNick}"

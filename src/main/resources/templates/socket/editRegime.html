@@ -1,0 +1,70 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Panel Main Page</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+</head>
+<body>
+<div th:fragment="edit-regime">
+    <form th:action="@{save-regime}" th:object="${regime}" method="post" th:id="form">
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <ul th:if="${#fields.hasAnyErrors()}" class="alert alert-danger" role="alert">
+                    <li th:each="err : ${#fields.allErrors()}" th:text="${err}">...</li>
+                </ul>
+                <input hidden type="text" th:field="*{id}"/>
+                <input hidden type="text" th:field="*{nodes}"/>
+                <input hidden type="text" th:field="*{parentId}"/>
+                <p></p>
+                <p>Խմբի Անվանումը</p>
+                <input class="form-control" type="text" th:field="*{regimeNick}" required/>
+
+                <span th:if="${#fields.hasErrors('regimeNick')}" th:errors="*{regimeNick}"
+                      class="text-danger">Name Error</span>
+                <p>Խմբի համարը</p>    <input class="form-control" type="text" th:field="*{regimeId}"/>
+                <p>Նկարագրություն</p>   <textarea type="" th:field="*{regimeDescription}"/></textarea>
+                <!--                <a th:href="@{init(parentId=*{parentId})}" class="btn btn-success" role="button">start routing</a>-->
+                <br><br>
+                <table>
+                    <tr>
+                        <td style="width:11em">Երկուշաքթի</td>
+                        <td><input type="checkbox" th:field="*{d1}"/></td>
+                    </tr>
+                    <tr>
+                        <td>Երեքշաբթի</td>
+                        <td><input type="checkbox" th:field="*{d2}"/></td>
+                    </tr>
+                    <tr>
+                        <td>Չորեքշաբթի</td>
+                        <td><input type="checkbox" th:field="*{d3}"/></td>
+                    </tr>
+                    <tr>
+                        <td>Հինգշաբթի</td>
+                        <td><input type="checkbox" th:field="*{d4}"/></td>
+                    </tr>
+                    <tr>
+                        <td>Ուրբաթ</td>
+                        <td><input type="checkbox" th:field="*{d5}"/></td>
+                    </tr>
+                    <tr>
+                        <td>Շաբաթ</td>
+                        <td><input type="checkbox" th:field="*{d6}"/></td>
+                    </tr>
+                    <tr>
+                        <td>Կիրակի</td>
+                        <td><input type="checkbox" th:field="*{d7}"/></td>
+                    </tr>
+                </table>
+                <br>
+                <p>Բացվելու ժամանակ</p>    <input class="form-control" th:type="time" th:field="*{startDailyTime}" required/>
+                <p>Փակվելու ժամանակ</p>    <input class="form-control" th:type="time" th:field="*{endDailyTime}" required/>
+                <p><br>
+                    <input class="btn btn-primary" th:id="submit" type="submit" value="Հաստատել"/>
+                    <input class="btn btn-primary" type="reset" value="Զրոյացում"/></p>
+            </div>
+        </div>
+    </form>
+</div>
+<div th:fragment="saveSuccess">saveSuccess</div>
+</body>
+</html>

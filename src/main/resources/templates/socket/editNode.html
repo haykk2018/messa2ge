@@ -20,8 +20,15 @@
             <span th:if="${#fields.hasErrors('nodeNick')}" th:errors="*{nodeNick}" class="text-danger">Name Error</span>
 
             <p>Child Id</p>    <input class="form-control" type="text" th:field="*{childId}" readonly>
-            <p>Start Time</p>    <input class="form-control" th:type="time" th:field="*{startDailyTime}" required/>
-            <p>End Time</p>    <input class="form-control" th:type="time" th:field="*{endDailyTime}" required/>
+
+            <br>
+            <p>խումբը</p>
+            <select  th:field="*{regime}">
+                <option th:each="r : ${regimes}"
+                        th:value="${r.id}"
+                        th:text="${r.regimeNick}">
+                </option>
+            </select>
             <br><br>
             <p>
                 <input class="btn btn-primary" th:id="submit" type="submit" value="Submit"/>

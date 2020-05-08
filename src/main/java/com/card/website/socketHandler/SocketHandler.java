@@ -2,21 +2,21 @@ package com.card.website.socketHandler;
 
 import com.card.website.domain.Node;
 import com.card.website.domain.Parent;
+import com.card.website.domain.Regime;
 import com.card.website.repository.NodeRepository;
 import com.card.website.repository.ParentRepository;
+import com.card.website.repository.RegimeRepository;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
-import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -26,18 +26,31 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class SocketHandler extends TextWebSocketHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(SocketHandler.class);
-    static WebSocketSession curSession;
-    static String parentId;
-    static HashMap<String, WebSocketSession> sessionByParId = new HashMap<String, WebSocketSession>();
     static public HashMap<String, Boolean> statusForEveryParId = new HashMap<String, Boolean>();
     static public HashMap<String, ArrayList<String>> messagesQueListByParId = new HashMap<String, ArrayList<String>>();
-
-
+    static public HashMap<String, WebSocketSession> sessionByParId = new HashMap<String, WebSocketSession>();
+    static WebSocketSession curSession;
+    static String parentId;
     List<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
     @Autowired
     private NodeRepository nodeRepository;
     @Autowired
     private ParentRepository parentRepository;
+    @Autowired
+    private RegimeRepository regimeRepository;
+
+    public static void sendMessage(String parentId, String message) throws IOException {
+
+        WebSocketSession session = sessionByParId.get(parentId);
+
+        if (session != null && session.isOpen()) {
+
+            synchronized (session) {
+                session.sendMessage(new TextMessage(message));
+            }
+
+        }
+    }
 
     public void sendMessagesFromQue() throws IOException {
 
@@ -48,19 +61,6 @@ public class SocketHandler extends TextWebSocketHandler {
                 messagesQueListByParId.get(parentId).remove(0);
                 statusForEveryParId.put(parentId, false);
             }
-        }
-    }
-
-    public void sendMessage(String parentId, String message) throws IOException {
-
-        WebSocketSession session = sessionByParId.get(parentId);
-
-        if (session != null && session.isOpen()) {
-
-            synchronized (session) {
-                session.sendMessage(new TextMessage(message));
-            }
-
         }
     }
 
@@ -91,25 +91,62 @@ public class SocketHandler extends TextWebSocketHandler {
                 statusForEveryParId.put(parentId, true);
                 parent = parentRepository.findParentByParentId(parentId) != null ? parentRepository.findParentByParentId(parentId) : parent;
                 parent.setParentId(parentId);
+                Regime regime;
+                //if we already made default regime we don't make again
+                if (parent.getNodes() != null && parent.getNodes().size() != 0 && parent.getNodes().get(0).getRegime() != null) {
+                    regime = parent.getNodes().get(0).getRegime();
+                } else {
+                    regime = new Regime();
+                    regime.setRegimeNick("Պասիվ Խումբ");
+                    regime.setParentId(parentId);
+                    regime.setRegimeId(UUID.randomUUID().toString());
+                }
                 for (Object n : receivedList) {
                     Node node = new Node();
                     node.setChildId(n.toString());
                     node.setParent(parent);
+                    node.setRegime(regime);
+//                    nodeRepository.save(node);
                     nodes.add(node);
                 }
                 parent.setNodes(nodes);
+//                regime.setNodes(nodes);
+//                nodeRepository.saveAll(nodes);
                 parentRepository.save(parent);
+//
+
+//                regimeRepository.save(regime);
                 break;
             case "parentId":
                 parentId = mapValue.get("value").toString();
                 sessionByParId.put(parentId, session);
                 statusForEveryParId.put(parentId, true);
+                // if not exist in db => write parent
                 if (parentRepository.findParentByParentId(parentId) == null) {
                     parent.setParentId(parentId);
+
+//                    parent.setNodes(new ArrayList<Node>(0));
                     parentRepository.save(parent);
                 }
                 break;
-            case "child":
+            case "tabsStatuses":
+                ArrayList<Map<String, String>> statusList = (ArrayList) mapValue.get("idChildes");
+                parentId = mapValue.get("idParent").toString();
+                parent = parentRepository.findParentByParentId(parentId);
+
+                if (parent != null) {
+                    for (Map<String, String> map : statusList) {
+                        for (Node n : parent.getNodes()) {
+                            if (map.containsKey(n.getChildId())) {
+                                Map.Entry<String, String> entry = map.entrySet().iterator().next();
+                                String key = entry.getKey();
+                                String value = entry.getValue();
+                                n.setStatus(value);
+                            }
+                        }
+                    }
+                }
+                parentRepository.save(parent);
                 break;
             //   every receive message  waiting = false,  its manning you can paste new message
             case "confirmMessage":
@@ -126,47 +163,47 @@ public class SocketHandler extends TextWebSocketHandler {
 
     }
 
-    @Scheduled(fixedRate = 9000)
-    public void messageScheduler() throws IOException {
-        String message;
-        //        first find all which must be open
-        Iterable<Node> toOpenNodes = nodeRepository.findAllByStartDailyTimeBeforeAndEndDailyTimeAfterAndOpenedFalse(LocalTime.now(), LocalTime.now());
-
-        if (toOpenNodes != null) {
-
-            for (Node node : toOpenNodes) {
-                node.setOpened(true);
-                nodeRepository.save(node);
-                message = "sp" + node.getChildId() + "Pop" + node.getChildId() + "G" + node.getParent().getParentId();
-                if (messagesQueListByParId.containsKey(node.getParent().getParentId())) {
-                    messagesQueListByParId.get(node.getParent().getParentId()).add(message);
-                } else {
-                    messagesQueListByParId.put(node.getParent().getParentId(), new ArrayList<String>(Arrays.asList(message)));
-                }
-
-            }
-        }
-        //        second find all which must to close
-        Iterable<Node> toCloseNodes = nodeRepository.findAllByStartDailyTimeAfterOrEndDailyTimeBeforeAndOpenedIsTrue(LocalTime.now(), LocalTime.now());
-
-        if (toCloseNodes != null) {
-
-            for (Node node : toCloseNodes) {
-                node.setOpened(false);
-                nodeRepository.save(node);
-                message = "sp" + node.getChildId() + "Pcl" + node.getChildId() + "G" + node.getParent().getParentId();
-                if (messagesQueListByParId.containsKey(node.getParent().getParentId())) {
-                    messagesQueListByParId.get(node.getParent().getParentId()).add(message);
-                } else {
-                    messagesQueListByParId.put(node.getParent().getParentId(), new ArrayList<String>(Arrays.asList(message)));
-                }
-            }
-        }
-
-        sendMessagesFromQue();
-
-        LOG.info("Hello from our simple scheduled method");
-    }
+//    @Scheduled(fixedRate = 900000)
+//    public void messageScheduler() throws IOException {
+//        String message;
+//        //        first find all which must be open
+////        Iterable<Node> toOpenNodes = nodeRepository.findAllByStartDailyTimeBeforeAndEndDailyTimeAfterAndOpenedFalse(LocalTime.now(), LocalTime.now());
+//        Iterable<Node> toOpenNodes = nodeRepository.findAll();
+//        if (toOpenNodes != null) {
+//
+//            for (Node node : toOpenNodes) {
+//                node.setOpened(true);
+//                nodeRepository.save(node);
+//                message = "sp" + node.getChildId() + "Pop" + node.getChildId() + "G" + node.getParent().getParentId();
+//                if (messagesQueListByParId.containsKey(node.getParent().getParentId())) {
+//                    messagesQueListByParId.get(node.getParent().getParentId()).add(message);
+//                } else {
+//                    messagesQueListByParId.put(node.getParent().getParentId(), new ArrayList<String>(Arrays.asList(message)));
+//                }
+//
+//            }
+//        }
+//        //        second find all which must to close
+////        Iterable<Node> toCloseNodes = nodeRepository.findAllByStartDailyTimeAfterOrEndDailyTimeBeforeAndOpenedIsTrue(LocalTime.now(), LocalTime.now());
+//        Iterable<Node> toCloseNodes = nodeRepository.findAll();
+//        if (toCloseNodes != null) {
+//
+//            for (Node node : toCloseNodes) {
+//                node.setOpened(false);
+//                nodeRepository.save(node);
+//                message = "sp" + node.getChildId() + "Pcl" + node.getChildId() + "G" + node.getParent().getParentId();
+//                if (messagesQueListByParId.containsKey(node.getParent().getParentId())) {
+//                    messagesQueListByParId.get(node.getParent().getParentId()).add(message);
+//                } else {
+//                    messagesQueListByParId.put(node.getParent().getParentId(), new ArrayList<String>(Arrays.asList(message)));
+//                }
+//            }
+//        }
+//
+//        sendMessagesFromQue();
+//
+//        LOG.info("Hello from our simple scheduled method");
+//    }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
