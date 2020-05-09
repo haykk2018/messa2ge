@@ -78,11 +78,6 @@ public class SocketHandler extends TextWebSocketHandler {
         } catch (com.google.gson.JsonSyntaxException ex) {
             recycledMessage = message.getPayload();
         }
-//        session.sendMessage(new TextMessage("Hello " + message.getPayload() + " !"));
-//		for(WebSocketSession webSocketSession : sessions) {
-//			Map value = new Gson().fromJson(message.getPayload(), Map.class);
-//			webSocketSession.sendMessage(new TextMessage("Hello " + message.getPayload() + " !"));
-//		}
         switch (recycledMessage) {
             case "routingResponse":
                 ArrayList receivedList = (ArrayList) mapValue.get("idChildes");
@@ -106,16 +101,10 @@ public class SocketHandler extends TextWebSocketHandler {
                     node.setChildId(n.toString());
                     node.setParent(parent);
                     node.setRegime(regime);
-//                    nodeRepository.save(node);
                     nodes.add(node);
                 }
                 parent.setNodes(nodes);
-//                regime.setNodes(nodes);
-//                nodeRepository.saveAll(nodes);
                 parentRepository.save(parent);
-//
-
-//                regimeRepository.save(regime);
                 break;
             case "parentId":
                 parentId = mapValue.get("value").toString();
@@ -124,8 +113,6 @@ public class SocketHandler extends TextWebSocketHandler {
                 // if not exist in db => write parent
                 if (parentRepository.findParentByParentId(parentId) == null) {
                     parent.setParentId(parentId);
-
-//                    parent.setNodes(new ArrayList<Node>(0));
                     parentRepository.save(parent);
                 }
                 break;
@@ -149,7 +136,9 @@ public class SocketHandler extends TextWebSocketHandler {
                 parentRepository.save(parent);
                 break;
             //   every receive message  waiting = false,  its manning you can paste new message
-            case "confirmMessage":
+            case "refreshModes":
+                parentId = mapValue.get("idParent").toString();
+                sendRegimes(parentId);
                 break;
             default:
                 //   from  which parent come response > we set that parent id status true, so that can sand the message again
@@ -163,7 +152,7 @@ public class SocketHandler extends TextWebSocketHandler {
 
     }
 
-//    @Scheduled(fixedRate = 900000)
+    //    @Scheduled(fixedRate = 900000)
 //    public void messageScheduler() throws IOException {
 //        String message;
 //        //        first find all which must be open
@@ -204,6 +193,22 @@ public class SocketHandler extends TextWebSocketHandler {
 //
 //        LOG.info("Hello from our simple scheduled method");
 //    }
+    // find all regimes refereed by regimes and send they data
+    public void sendRegimes(String parentId) throws IOException {
+
+        Iterable<Regime> regimes = regimeRepository.findAllByParentId(parentId);
+
+        for (Regime r : regimes) {
+            for (Node n : r.getNodes()) {
+                n.setRegime(null);
+                n.setParent(null);
+            }
+        }
+
+        Gson gson = new Gson();
+        String jsonString = gson.toJson(regimes);
+        SocketHandler.sendMessage(parentId, jsonString);
+    }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {

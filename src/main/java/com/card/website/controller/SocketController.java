@@ -172,7 +172,7 @@ public class SocketController {
     @GetMapping(path = "/init-child")
     @ResponseBody
     String initChild(@RequestParam String parentId) throws IOException {
-        new SocketHandler().sendMessage(parentId, "initChild");
+        SocketHandler.sendMessage(parentId, "initChild");
         return "ok";
     }
 
@@ -232,9 +232,5 @@ public class SocketController {
         String jsonString = gson.toJson(regimes);
         SocketHandler.sendMessage(parentId, jsonString);
     }
-
-//    void sendRegimes(@RequestParam String parentId){
-//
-//    }
 
 }
