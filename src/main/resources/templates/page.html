@@ -3,8 +3,8 @@
 <head>
     <title th:text="${curPage?.title}"></title>
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
-    <meta data-th-attr="content=${curPage.keywords}" name="keywords">
-    <meta data-th-attr="content=${curPage.description}" name="description">
+    <meta data-th-attr="content=${curPage?.keywords}" name="keywords">
+    <meta data-th-attr="content=${curPage?.description}" name="description">
     <link href="/static/css/site/template.css" rel="stylesheet">
     <link href="/webjars/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <script src="/webjars/jquery/3.4.1/jquery.min.js"></script>
@@ -25,15 +25,15 @@
         <div class="collapse navbar-collapse" id="myNavbar">
             <!--            menu part-->
             <ul class="nav navbar-nav">
-                <li th:each="p : ${pages}" th:class="${p.menuName}==${curPage.menuName} ? active : ''">
+                <li th:each="p : ${pages}" th:class="${p.menuName}==${curPage?.menuName} ? active : ''">
                     <a th:href="@{/(id=${p.langId})}">[[${p.menuName}]]</a>
                 </li>
             </ul>
             <!--            End menu part-->
             <!--            Lang and login part-->
             <ul class="nav navbar-nav navbar-right">
-                <li th:each="ln : ${T(com.card.website.domain.Page.Lang).values()}" th:unless="${ln == curPage.lang}">
-                    <a th:href="@{/(id=${curPage.langId},lang=${ln})}">[[#{lang.__${ln}__}]]</a>
+                <li th:each="ln : ${T(com.card.website.domain.Page.Lang).values()}" th:unless="${ln == curPage?.lang}">
+                    <a th:href="@{/(id=${curPage?.langId},lang=${ln})}">[[#{lang.__${ln}__}]]</a>
                 </li>
                 <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
             </ul>
