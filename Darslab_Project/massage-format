@@ -1,0 +1,60 @@
+{"device":"parent", "id":"asdfg"}
+
+startRouting
+{"device":"childes", "id":["a123","ac44","cd44"]}
+
+initChild
+{"device":"child", "id":"a123g"}
+
+
+startRouting
+{"device":"parent", "id":"asdfg"
+"device":"childes", "id":["a123","ac44","cd44"]}
+
+startRouting
+{"idParent":"asdfg"
+"idChildes":["a123","ac44","cd44"]}
+
+
+  հաղորդագրությունները բաժանել եմ տեսակների
+
+
+
+ա․ պատասխանի հաստատում, կամ ձախողում։
+
+{"character":"confirmMessage", "value":"OK"}
+
+
+բ․ ծնողի id֊ների և ժառանգների՝ ճտերի, id֊ների ստացում։
+
+{"character":"routingResponse", 
+"idParent":"1111",
+"idChildes":["aaa1","bbb1","ccc1"]}
+
+հնարավոր ա ուղարկել միայն կոնկրետ կլիենտի
+դեպք 1
+բայց երբ կապը ընդհստվում է նորից կպնում են կլիենտները և համակարգը պետք ա բացվել հրաման ուղարկի նա չգիտի ում ուղարկի
+
+{"character":"parentId", "value":"1111"}
+
+
+
+{"character":"regimesResponse", 
+"idParent":"1111",
+"regimes":[
+      {"day1": ["03:55","05:55"],"day2": ["03:55","05:55"],"day3": ["03:55","05:55"],"day4": ["03:55","05:55"],"day5": ["03:55","05:55"],"day6": ["03:55","05:55"],"day7": ["03:55","05:55"]}:["childId1234","childId456","childId293"],
+    ]
+}
+
+
+{
+"character":"regimesResponse",
+"idParent":"1111",
+"regimes": [
+{["day1","day2"]: ["03:55","05:55"]}:["childId1234","childId456","childId293"],]}
+}
+{"character":"tabsStatuses", "idParent":"1111", "idChildes":["childId1234":"opened","childId456":"closed","childId456":"opened",]}
+
+
+
+
